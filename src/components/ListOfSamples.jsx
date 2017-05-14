@@ -17,21 +17,34 @@ const numbers = [
   'ten',
 ]
 
+const brojevi = [
+  'jedan',
+  'dva',
+  'tri',
+  'cetiri',
+  'pet',
+  'sest',
+  'sedam',
+  'osam',
+  'devet',
+  'deset',
+]
+
 const sentenceCase = string => string.charAt(0).toUpperCase() + string.slice(1)
 
-const urlWithTitle = numbers
+const urlWithTitle = brojevi
   .map(n => ({url: `/${n}.mp3`, title: sentenceCase(n)}))
 
 // generate mfcc
 
-// Promise.all(urlWithTitle.map(async ({url, title}) => {
-//   const source = await getSourceFromFile(ctx, url)
-//   const channelData = source.buffer.getChannelData(0)
-//   return extractMfcc(channelData)
-// }))
-//   .then(results => {
-//     console.log(JSON.stringify(results))
-//   })
+Promise.all(urlWithTitle.map(async ({url, title}) => {
+  const source = await getSourceFromFile(ctx, url)
+  const channelData = source.buffer.getChannelData(0)
+  return extractMfcc(channelData)
+}))
+  .then(results => {
+    console.log(JSON.stringify(results))
+  })
 
 export default class ListOfSamples extends Component {
   // constructor(props) {

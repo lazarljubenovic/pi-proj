@@ -112,3 +112,19 @@ const findIndexOf = (fn, arr) => {
 
 export const maxIndex = findIndexOf.bind(null, (curr, acc) => curr > acc)
 export const minIndex = findIndexOf.bind(null, (curr, acc) => curr < acc)
+
+const trimBelowThreshold = thresholdFunction => array => {
+  let lo = 0
+  let hi = array.length - 1
+  while (lo <= array.length - 1 && !thresholdFunction(array[lo])) {
+    console.log(array[lo])
+    lo++
+  }
+  while (hi >= 0 && !thresholdFunction(array[hi])) {
+    console.log(hi)
+    hi--
+  }
+  return array.slice(lo, hi)
+}
+
+export const trimMfcc = trimBelowThreshold(vector => vector.some(x => Math.abs(x) > .1))

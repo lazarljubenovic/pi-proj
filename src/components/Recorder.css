@@ -1,0 +1,16 @@
+#mic {
+    position: absolute;
+    background-color: rgba(255, 255, 255, .4);
+    border: none;
+    outline: none;
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, .2);
+    padding: 3rem;
+    transition: all .3s ease;
+    cursor: pointer;
+}
+
+#mic:focus, #mic:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .5);
+    background-color: rgba(255, 255, 255, .6);
+}
