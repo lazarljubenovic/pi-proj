@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import samples from '../services/mfcc-data'
 import Comparison from './Comparison'
 import { dtwMatrixAndDistance } from '../services/dtw'
-import { minIndex,trimMfcc } from '../services/utils'
+import { minIndex } from '../services/utils'
 
 const smallShadow = '0 4px 4px rgba(0, 0, 0, .4), 0 0 12px rgba(0, 0, 0, .06)'
 const largeShadow = '0 6px 6px rgba(0, 0, 0, .6), 0 0 12px rgba(0, 0, 0, .06)'

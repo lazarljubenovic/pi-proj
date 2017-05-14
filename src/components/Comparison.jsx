@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { sequentialScale, drawMatrix, drawSpectogram, mapValueToColor } from '../services/utils'
+import { drawMatrix, drawSpectogram } from '../services/utils'
 
 const square = size => ({width: size, height: size})
 const center = {display: 'flex', justifyContent: 'center', alignItems: 'center'}
@@ -34,14 +34,31 @@ export default class Comparison extends Component {
           width: this.resolution * (13 + this.props.utter.length),
           height: this.resolution * (13 + this.props.sample.length),
         }}>
-          <canvas style={{position: 'absolute', transform: 'rotate(90deg) translate(0%, -100%)', transformOrigin: 'top left', top: 0, left: 0}} ref="sample"/>
+          <canvas style={{
+            position: 'absolute',
+            transform: 'rotate(90deg) translate(0%, -100%)',
+            transformOrigin: 'top left',
+            top: 0,
+            left: 0,
+          }} ref="sample"/>
           <canvas style={{position: 'absolute', bottom: 0, right: 0}} ref="utter"/>
           <canvas style={{position: 'absolute', top: 0, right: 0}} ref="matrix"/>
           <span style={{
-            position: 'absolute', ...square(this.resolution * 13), bottom: 0, left: 0, color: 'rgba(0, 0, 0, .4)', fontSize: '.66em', fontStyle: 'italic',
+            position: 'absolute', ...square(this.resolution * 13),
+            bottom: 0,
+            left: 0,
+            color: 'rgba(0, 0, 0, .4)',
+            fontSize: '.66em',
+            fontStyle: 'italic',
             ...center, ...vertical,
           }}>
-            <span style={{fontSize: '1.5em', fontStyle: 'normal', display: 'block', marginBottom: '.2rem', color: 'rgba(0, 0, 0, .6)'}}>{this.props.name}</span>
+            <span style={{
+              fontSize: '1.5em',
+              fontStyle: 'normal',
+              display: 'block',
+              marginBottom: '.2rem',
+              color: 'rgba(0, 0, 0, .6)',
+            }}>{this.props.name}</span>
             <span>{this.props.distance && this.props.distance.toFixed(2)}</span>
           </span>
         </div>

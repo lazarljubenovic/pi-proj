@@ -1,21 +1,19 @@
 import React, { Component } from 'react'
 import PlayButton from './PlayButton'
-import { extractMfcc, getSourceFromFile } from '../services/utils'
 
-const ctx = new AudioContext()
 
-const numbers = [
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-  'ten',
-]
+// const numbers = [
+//   'one',
+//   'two',
+//   'three',
+//   'four',
+//   'five',
+//   'six',
+//   'seven',
+//   'eight',
+//   'nine',
+//   'ten',
+// ]
 
 const brojevi = [
   'jedan',
@@ -36,15 +34,15 @@ const urlWithTitle = brojevi
   .map(n => ({url: `/${n}.mp3`, title: sentenceCase(n)}))
 
 // generate mfcc
-
-Promise.all(urlWithTitle.map(async ({url, title}) => {
-  const source = await getSourceFromFile(ctx, url)
-  const channelData = source.buffer.getChannelData(0)
-  return extractMfcc(channelData)
-}))
-  .then(results => {
-    console.log(JSON.stringify(results))
-  })
+// const ctx = new AudioContext()
+// Promise.all(urlWithTitle.map(async ({url, title}) => {
+//   const source = await getSourceFromFile(ctx, url)
+//   const channelData = source.buffer.getChannelData(0)
+//   return extractMfcc(channelData)
+// }))
+//   .then(results => {
+//     console.log(JSON.stringify(results))
+//   })
 
 export default class ListOfSamples extends Component {
   // constructor(props) {
