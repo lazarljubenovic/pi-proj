@@ -390,8 +390,7 @@ const props = {
 const App = () =>
   <div>
     <Recorder/>
-    <ListOfSamples/>
-    <Comparison {...props}/>
+    {/*<ListOfSamples/>*/}
   </div>
 
 export default App
