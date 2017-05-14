@@ -109,6 +109,28 @@ A . . . . x
 
 Zato se, osim putanje, govori i o njenoj **ceni**. Jasno je da je neophodno definisati metriku na osnovu koje će se porediti dva uzorka koja se trenutno ispituju. Na primer, za rastojanje između dva vektora se može uzeti Euklidova distanca između njih.
 
+Cena puta se definiše kao suma svih pojedinačnih cena između odgovarjaućih vektora na putanji. Zadatak DTW algoritma je da pronađe optimalnu cenu i odgovarajuću optimalnu putanju. U opštem slučaju optimalna savijena putanja ne mora da bude jedinstvena, ali se ovakve situacije retko sreću u praksi.
+
+Za određivanje optimalne putanje `p`, može se testirati svaka moguća savijena putanja između `X` i `Y`. Međutim, ovakav postupak bi imao eksponencijalnu složenost koji zavisi od dućina vektora `X` i `Y`, što nikako nisu mali brojevi. Ako definišemo prefikse sekvenci `X` i `Y` dužina `n` i `m` kao `X(1:n)` i `Y(1:m)` (gde je `n` između `1` i `N`, a `m` između `1` i `M`), kumulativna cena u tački `(n, m)` možemo definisati kao
+
+```
+D(n, m) = DTW(X(1:n), Y(1;m)).
+```
+
+Očigledno je da je `D(N, M) = DTW(X, Y)`, što predstavlja cenu koju tražimo.
+
+Odavde proizilaze sledeće rekurzivne formule kojima se može izračunati cena.
+
+> Kumulativna cena matrice `D` zadovoljava sledeće identitete:
+>
+> - `D(n, 1) = sum(c(xi, y1))`
+> - `D(1, m) = sum(c(x1, yi))`
+> - `D(n, m) = min{ D(n-1,m-1) , D(n,m-1) , D(n-1,m) } + c(xn, ym)`
+
+Navedena definicija je rekurzivna, pa se pribegava _dinamičkom programiranju_, koje daje sasvim zadovoljavajuće rešenje složenosti `O(NM)`, gde su `N` i `M` dužine vektora `X` i `Y`. [Incijalizacija](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L6-L10) se može pojednostaviti ako se matrica proširi [dodatnim redom](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L6) i [dodatnom kolonom](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L7), pri čemu se postavljaju [početni uslovi `D(n, 0) = Infinity` (za sve `n` između `1` i `N`), `D(0, m) = Infinity` (za sve `m` između `1` i `M`)](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L8), i [`D(0, 0) = 0` (početna cena je jednaka nuli)](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L10).
+
+Ovim uslovima su izbačena prva dva od tri identita, jer sa ovom ekstenzijom matrice uvek važi samo treći uslov, što značajno ubrzava izračunavanje ([nema grananja u petlji](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L14-L19)), po cenu malog dodatnog utroška memorije. Štaviše, ovo za sobom povlači da se matrica može računati po kolonama, jer je za `m`-tu kolonu potrebno samo poznavanje kolone sa indeksom `(m-1)`. Ovo znači da ukoliko je potrebno samo računanje vrednosti `DTW(X, Y) = D(N, M)`, a ne poznavanje cele putanje, dovoljno je odvojiti samo `O(N)` memorijskog prostora. Slično, ako se umesto kolona izaberu redovi, dovoljno je `O(M)`. Ipak, u oba slučaja je vremenska kompleksnost `O(NM)`. Štaviše, da bi se dobila cela putanja, potrebno je [izračunati sve elemente `N × M` matrice](https://github.com/lazarljubenovic/pi-proj/blob/master/src/services/dtw.js#L12-L13).
+
 
 
 
