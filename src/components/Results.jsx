@@ -18,7 +18,6 @@ export default class Results extends Component {
   }
 
   componentWillReceiveProps({utter}) {
-    // console.log('results component will receive props', utter)
     const data = samples.map(sample => ({sample, ...dtwMatrixAndDistance(sample, utter)}))
     const min = minIndex(data.map(x => x.distance))
     this.setState({data, min})

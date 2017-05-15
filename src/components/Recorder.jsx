@@ -39,17 +39,13 @@ export default class Recorder extends Component {
     const source = await getSourceFromMic(audioContext)
 
     // we hook the source up with the meyda analyzer
-    let featureBuffer = []
     const options = {
       audioContext,
       source,
       bufferSize: 1024,
       windowingFunctions: 'hamming',
       featureExtractors: 'mfcc',
-      callback: features => {
-        currentUtter.push(features)
-        featureBuffer.push(features)
-      },
+      callback: features => currentUtter.push(features),
     }
     meydaAnalyzer = Meyda.createMeydaAnalyzer(options)
     // meydaAnalyzer.start()
