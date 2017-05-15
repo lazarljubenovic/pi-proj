@@ -35,7 +35,6 @@ export const getSourceFromFile = async (ctx, url) => {
   const source = ctx.createBufferSource()
   const response = await fetch(url)
   const audioData = await response.arrayBuffer()
-  console.log('audio data', audioData)
   source.buffer = await ctx.decodeAudioData(audioData)
   return source
 }
@@ -68,13 +67,11 @@ export const drawSpectogram = resolution => (ctx, data) => {
 }
 
 export const drawMatrix = resolution => (ctx, data, path) => {
-  // data = data.slice(1).map(row => row.slice(1))
   const [xStep, yStep] = [resolution, resolution]
   const w = data[0].length * xStep
   const h = data.length * yStep
   ctx.canvas.width = w
   ctx.canvas.height = h
-  console.log(w, h)
   ctx.clearRect(0, 0, w, h)
 
   for (let y = 0, i = 0; i < data.length; i++, y += yStep) {
@@ -116,13 +113,9 @@ export const minIndex = findIndexOf.bind(null, (curr, acc) => curr < acc)
 const trimBelowThreshold = thresholdFunction => array => {
   let lo = 0
   let hi = array.length - 1
-  while (lo <= array.length - 1 && !thresholdFunction(array[lo])) {
-    console.log(array[lo])
-    lo++
+  while (lo <= array.length - 1 && !thresholdFunction(array[lo++])) {
   }
-  while (hi >= 0 && !thresholdFunction(array[hi])) {
-    console.log(hi)
-    hi--
+  while (hi >= 0 && !thresholdFunction(array[hi--])) {
   }
   return array.slice(lo, hi)
 }
