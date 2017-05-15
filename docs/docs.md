@@ -8,50 +8,35 @@ Odgovore na ova pitanja daje **izvlačenje karakteristike** (eng. _feature extra
 
 Prvi korak u bilo kom sistemu za automatsko prepoznavanje govora je **izvlačenje karakteristika** (eng. _feature extraction_), tj. izdvajanje delova zvučnog signala koji su od važnosti za identifikaciju jezičkog sadržaja od onih delova koji nose informacije kao što su pozadinski šumovi, emocije, i tako dalje.
 
-Srž rešenja leži u tome da se zvuci koje proizvodi čovek filtriraju na osnovu oblika vokalnog trakta, što uključuje jezik, zube, itd. Ovaj oblik određuje kakav će zvuk nastati. Oblik voklnog trakta se može predstaviti spektrom, a zadatak MFCC-a jeste da ga prikaže na pogodan način.
+Srž rešenja leži u tome da se zvuci koje proizvodi čovek filtriraju na osnovu oblika vokalnog trakta, što uključuje jezik, zube, itd. Ovaj oblik određuje kakav će zvuk nastati. Oblik voklnog trakta se može predstaviti spektrom, a zadatak MFCC-a jeste da ga prikaže na pogodan način. U nastavku je opisano dobijanje **Melovih frekventnih "kepstralnih" koeficijenata** (Mel Frequency Cepstral Coefficients, MFCC).
 
-MFCC je u širokoj upotrebi za automatsko prepoznavanje govora, jer daje reprezentaciju izgovorenih fonema koje ne zavise od boje glasa i visine tone (bar koliko je to moguće).
+> Reč "kepstar" je igra reči i dolazi od okretanja redosleda prva četiri slova reči "spektar", jer predstavlja _inverzne_ Furijeove transformacije logaritma spektra signala. Operacije nad kepstrom se slično često nazivaju _analiza kvefrence_ (od "frekvence") i _lifterovanje_ (od "filterovanje").
 
-Reč "kepstar" je igra reči i dolazi od okretanja redosleda prva četiri slova reči "spektar", jer predstavlja _inverzne_ Furijeove transformacije logaritma spektra signala. Operacije nad kepstrom se slično često nazivaju _analiza kvefrence_ (od "frekvence") i _lifterovanje_ (od "filterovanje").
+MFCC je u širokoj upotrebi za automatsko prepoznavanje govora, jer daje reprezentaciju izgovorenih fonema koje ne zavise od boje glasa i visine tona. Uspeh MFCC-a je i u mogućnosti kompaktnog zapisa amplitudskog spektra govora. Svaki korak u izdvajanju MFC koeficijanata motivisan je perceptualnim doživljajem ljudskog govora od strane čoveka.
 
-Računaje MFCC-a se može opisati kroz sledeći niz koraka.
+Računaje MFCC-a se može opisati kroz sledeći niz koraka. Polazi se od talasnog oblika.
 
-1. Izračunati pektralnu amplitudu primenom Hamingovog prozora.
-2. Filterovati signl u spektralnom domenu trogaonom bankom filtera, koji su približno linearno raspoređeni na Melovoj skali, i imaju jednaku širinu u Melovoj skali.
-3. Izračunati diskretnu kosinsnu transformaciju logaritamskog spektra.
+- Deljenje govornog signala na okvire (frejmove), obično primenom prozora nad fiksniranim intervalima. Cilj je modelovanje malih (obično oko 20ms dugih) odeljaka signala za koje se statistički može reći da su stacionarni. Naravno, zvučni signal se konstantno menja, tako da nikad nije _zapravo_ stacionaran. Zato se i uzimaju ovoliki intervali. Eksperimentalno je dokazano da su dovoljno dugi da sadrže dovoljno uzoraka za procenu spektra, a dovoljno kratki da se ne menjaju previše tokom vremena. Odmerci se provlače kroz funkciju prozora, uglavnom Hamingovu. Na ovaj način se uklanjaju ivični efekti. Rezultat ove faze je kepstralni fektor za svaki okvir.
+- Sledeći korak je računanje diskretne Furijeove transformacije (DTF) za svaki okvir. Ovde je od interesa samo logatiram spektra amplitude. Faza se odbacuje jer su perceptualna istraživanja pokazala da amplituda igra mnogo značajniju ulogu, tj. da nosi mnogo više informacija o govoru nego faza. Uzima se logaritam zbog načina na koji ljudsko uho doživljava jačinu zvuka.
+- Posle ovoga se "pegla" spektra i naglašavaju se samo frekvence koje su u perceptualnom smislu od značaja. Ovo se postiže skupljanjem (na primer) 256 spektralnih komponenti u (na primer) 40 frekventnih banaka. Ove banke nisu na jednakim rastojanjima jedne od druge, jer čovekov slušni aparat mnogo bolje razlikuje promenu u višim nego u nižim frekvencijama. Zato su banke mnogo tesnije poređane u oblastima nižih frekvencija. Ova skala se naziva Melova skala. Skoro je lineatna izpod jednog kiloherca, a posle toga postaje jasno logaritamska. Prevođenje frekvence u Melovu skalu obavlja se [formulom](https://github.com/meyda/meyda/blob/master/src/utilities.js#L96) `M(f) = 1125 * ln (1 + f/700)`. Naravno, moguće je i [inverzno prevođenje](https://github.com/meyda/meyda/blob/master/src/utilities.js#L91).
+- Među komponentama koje se dobijaju javlja se velika korelacija. Utvrđeno je da je dovoljna samo polovina (u [konkretnoj implementaciji ih je 13](https://github.com/meyda/meyda/blob/master/src/extractors/mfcc.js#L39)) kepstralnih karakteristika. Ovime se smanjuje broj parametara sistema što ubrzava izračunavanje i smanjuje neophodni memorijski prostor.
+- Dobijene karateristike se transformišu. Mada je moguće primeniti različite transformacije, za prepoznavanje govora se najbolje pokazala [diskretna kosinusna transformacija](https://github.com/meyda/meyda/blob/master/src/extractors/mfcc.js#L39) (DCT).
 
-### Melova skala
+### Melove banke
 
-Melova skala predstavlja preslikavanje između izmerene frekvece i "doživljene" frekvence. Ljudi mnogo bolje primećuju promene u "piskavosti" tona nižih nego viših frekvencija. Korišćenje Melove skale nam omoguća da karakteristike koje budemo izdvojili iz zvučnog zapisa bolje odgovaraju ljudskom doživljaju zvuka.
+Kao što je već rečeno, Melova skala predstavlja preslikavanje između izmerene frekvece i "doživljene" frekvence. Ljudi mnogo bolje primećuju promene u "piskavosti" tona nižih nego viših frekvencija. Korišćenje Melove skale nam omoguća da karakteristike koje budemo izdvojili iz zvučnog zapisa bolje odgovaraju ljudskom doživljaju zvuka. Ovde je opisan način za dobijanje Melove skale, uz linkove do [konkretne implementacije](https://github.com/meyda/meyda/blob/master/src/utilities.js#L104) u korišćenoj biblioteci otvrenog koda Meyda.
 
-Prevođenje frekvence u Melovu skalu obavlja se sledećom formulom.
+Najpre se bira [frekventni opseg od interesa](https://github.com/meyda/meyda/blob/master/src/utilities.js#L110-L111). Po Najkvistu se kao gornja granica uzima polovina frekvence odmeraka. Ove granice se zatim [prevode u Melovu skalu](https://github.com/meyda/meyda/blob/master/src/utilities.js#L114-L115) korišćenjem pomenute [formule](https://github.com/meyda/meyda/blob/master/src/utilities.js#L96). Sada je nad Melovom skalom moguće izvršiti [linearnu interpolaciju](https://github.com/meyda/meyda/blob/master/src/utilities.js#L121).
 
-```
-M(f) = 1125 *ln (1 + f/700)
-```
+Kada se Melovi brojevi [prevedu nazad u frekvencu](https://github.com/meyda/meyda/blob/master/src/utilities.js#L131) dobijaju se razlomljeni brojevi, odnosno dobija se veća rezolucija frekvence od postojeće. Zato je potrebno zaokružiti frekvence i [smestiti ih u najbližu FFT banku](https://github.com/meyda/meyda/blob/master/src/utilities.js#L134-L135). Ovaj proces ne utiče na tačnost karakteristika.
 
-### Algoritam
-
-#### Priprema
-
-Sinal se najpre deli na okvire dužine 20 do 40 milisekundi. U konkretnoj implementaciji uzeto je ??. Koraci navedeni u nastavku se odnose na svaki frejm ponaosob.
-
-Rezultat obrade svakog frejma je 12 MFC koeficijenata.
-
-#### DFT
-
-Računa se diskretna Furijeova transformacija (DFT) frejma $S_i (k)$, na osnovu čega se dobija periodogramska procena energetskog spektra.
-
-#### Računanje Melove banke filtera
-
-Ovo je skup od 26 trouglastih filtera koje primenjujemo na dobijenu periodogramsku procenu iz prethodnog koraka. Banka filtera se sastoji od 26 vektora dužine 257 ??. Svaki fektor se uglavnom sastoji od nula, ali ima ne-nulte elemente za određeni deo spektra.
-
-Da bismo izračunali energiju, množimo svaku banku filtera sa energetskim spektrom, i onda saberemo koeficijente.
-
+Sada se mogu kreirati Melove banke. Prva banka počinje u početnoj tački, doseže maksimum u drugoj tački, i onda se vraća na nulu u trećoj. Druga banka počinje u drugoj tački, doseže maksimum u trećoj i pada na nulu u četvrtoj. [I tako dalje.](https://github.com/meyda/meyda/blob/master/src/utilities.js#L146-L155)
 
 ## Poređenje karakteristika
 
-Dynamic time warping (dinamičko savijanje vremena, DTW) je tehnika za nalaženje optimalnog načina na koji se dve vremenski zavisne sekvence mogu poravnati, tako da budu što sličnije. Treba da otkloni vremensku zavinost, odnosno da "savije" vreme u smislu da proizvoljne sekvence produži, odnosno skrati, kako bi se postiglo bolje poklapanje. Ovo se uklapa u potrebe poklapanja uzoraka ljudskog glasa, jer se na taj način zanemaruje trajanje izgovorene reči, kao i akcenat. Ilustracije radi, izgovor reči "elfaak" i "eelfak" bi imao 100% poklapanje (odnosno imao bi cenu jednaku nuli) jer se produžavanjem slova _a_, i skraćenjem slova _e_ iz prve reči dolazi u drugu.
+Nakon što su karakteristike izdvojene iz zvučnog signala, neophnodno je na neki način **porediti dobijene karakteristike**, kako bi se procenila njihova sličnost i na taj način utvrdilo da li se u oba zvučna signala radi o istoj izgovorenoj reči. Ovde je opisan DTW.
+
+**Dynamic time warping** (dinamičko savijanje vremena, DTW) je tehnika za nalaženje optimalnog načina na koji se dve vremenski zavisne sekvence mogu poravnati, tako da budu što sličnije. Treba da otkloni vremensku zavinost, odnosno da "savije" vreme u smislu da proizvoljne sekvence produži, odnosno skrati, kako bi se postiglo bolje poklapanje. Ovo se uklapa u potrebe poklapanja uzoraka ljudskog glasa, jer se na taj način zanemaruje trajanje izgovorene reči, kao i akcenat. Ilustracije radi, izgovor reči "elfaak" i "eelfak" bi imao 100% poklapanje (odnosno imao bi cenu jednaku nuli) jer se produžavanjem slova _a_, i skraćenjem slova _e_ iz prve reči dolazi u drugu.
 
 Formalno rečeno, cilj DTW-a je da uporedi dve vremenski zavisne sekvence `X = (x1, x2, ... xN)` dužine `N` i `Y = (y1, y2, ..., yM)`, dužine `M`. U opštem slučaju, ovi nizovi mogu biti karakteristike odmerene nad tačkama u vremenu na jednakoj razdaljini. U praksi, ovo znači da se radi o diskretnim signalima koji su opisani nekim vektorom (u našem slučaju svaki od članova sekvence predstavlja vektor koji sačinjava 13 skalara dobijenih na osnovu MFCC-a). Ako _prostor karakteristike_ obeležimo sa `F`, možemo reći da DTW algoritam treba da kao rezultat da cenu `c`, koja predstavlja preslikavanje Dekartovog proizvoda dva ovakva skupa (`F × F`) u skup ne-negativnih realnih brojeva. Kažemo da između dva podskupa ovih prostora (npr. dva različita snimka izgovorene reči) postoji _dobro preklapanje_ ako je cena mala, i _loše preklapanje_ ako je cena velika.
 
